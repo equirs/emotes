@@ -1,13 +1,13 @@
-package com.example;
+package dev.yequi.emotes;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
-public class ExamplePluginTest
+public class EmotesPluginTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(ExamplePlugin.class);
+		ExternalPluginManager.loadBuiltin(EmotesPlugin.class);
 		RuneLite.main(args);
 	}
 }
