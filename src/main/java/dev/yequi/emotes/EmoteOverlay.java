@@ -99,6 +99,9 @@ public class EmoteOverlay extends Overlay
 		{
 			return;
 		}
+
+		plugin.scrollToHighlight(emoteWidget);
+
 		Point windowLocation = container.getCanvasLocation();
 		if (windowLocation.getY() > canvasLocation.getY() + emoteWidget.getHeight()
 			|| windowLocation.getY() + container.getHeight() < canvasLocation.getY())
@@ -124,7 +127,8 @@ public class EmoteOverlay extends Overlay
 			borderHoverColor);
 
 		String text = value.getLabel();
-		if (!config.displayLabels() || Strings.isNullOrEmpty(text))
+		if (!config.displayLabels() || Strings.isNullOrEmpty(text)
+			|| emoteWidget.getHeight() + canvasLocation.getY() > windowLocation.getY() + container.getHeight())
 		{
 			return;
 		}

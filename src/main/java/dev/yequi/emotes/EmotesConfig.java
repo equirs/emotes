@@ -70,6 +70,17 @@ public interface EmotesConfig extends Config
 	}
 
 	@ConfigItem(
+		position = 6,
+		keyName = "scrollToHighlighted",
+		name = "Scroll to first highlight",
+		description = "Scrolls the emotes tab to the first highlighted item whenever the tab is reset"
+	)
+	default boolean scrollToHighlighted()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "savedHighlightInfo",
 		name = "Highlighted emote info",
 		description = "Map of sprite ids to highlight",
