@@ -73,12 +73,53 @@ public interface EmotesConfig extends Config
 		position = 6,
 		keyName = "scrollToHighlighted",
 		name = "Scroll to first highlight",
-		description = "Scrolls the emotes tab to the first highlighted item whenever the tab is reset"
+		description = "Scrolls the emotes tab to the first highlighted item whenever the tab is reset",
+		hidden = true
 	)
 	default boolean scrollToHighlighted()
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		position = 6,
+		keyName = "scrollToHighlighted",
+		name = "Scroll to first highlight",
+		description = "Scrolls the emotes tab to the first highlighted item whenever the tab is reset",
+		hidden = true
+	)
+	void setScrollToHighlighted(boolean enabled);
+
+	@ConfigItem(
+		position = 6,
+		keyName = "emoteToScrollTo",
+		name = "Emote to scroll to",
+		description = "Scrolls to this emote whenever the tab resets (if scroll mode enabled)"
+	)
+	default Emote emoteToScrollTo()
+	{
+		return Emote.YES;
+	}
+
+	@ConfigItem(
+		position = 7,
+		keyName = "scrollMode",
+		name = "Scroll mode",
+		description = "Where the scrolled-to emote will appear relative to the container"
+	)
+	default ScrollMode scrollMode()
+	{
+		return ScrollMode.DISABLED;
+	}
+
+	@ConfigItem(
+		position = 7,
+		keyName = "scrollMode",
+		name = "Scroll mode",
+		description = "Where the scrolled-to emote will appear relative to the container",
+		hidden = true
+	)
+	void setScrollMode(ScrollMode mode);
 
 	@ConfigItem(
 		keyName = "savedHighlightInfo",

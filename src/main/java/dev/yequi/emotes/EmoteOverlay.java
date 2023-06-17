@@ -80,9 +80,13 @@ public class EmoteOverlay extends Overlay
 		{
 			return null;
 		}
-
+		int spriteIdToScrollTo = config.emoteToScrollTo().getSpriteId();
 		for (Widget emoteWidget : emoteContainer.getDynamicChildren())
 		{
+			if (emoteWidget.getSpriteId() == spriteIdToScrollTo)
+			{
+				plugin.scrollToHighlight(emoteWidget);
+			}
 			EmoteHighlight value = highlights.get(emoteWidget.getSpriteId());
 			if (value != null)
 			{
@@ -99,8 +103,6 @@ public class EmoteOverlay extends Overlay
 		{
 			return;
 		}
-
-		plugin.scrollToHighlight(emoteWidget);
 
 		Point windowLocation = container.getCanvasLocation();
 		if (windowLocation.getY() > canvasLocation.getY() + emoteWidget.getHeight()

@@ -8,3 +8,5 @@ or change labels.
 
 Text is overlaid at the bottom of each emote widget in the event that the clue items plugin overlays its text for emote
 clues, which should be at the top.
+
+Note that disabled emotes cannot be highlighted or scrolled to.

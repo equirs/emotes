@@ -95,14 +95,22 @@ public enum Emote
 
 	PREMIER_SHIELD("Premier Shield", EMOTE_PREMIER_SHIELD),
 	EXPLORE("Explore", 2423),
-	RELIC_UNLOCK("Relic unlock", 2425);
+	RELIC_UNLOCK_TL("Relic unlock (twisted)", 2424),
+	RELIC_UNLOCK_TBL("Relic unlock (trailblazer)", 2425),
+	FRAGMENT_UNLOCK("Fragment unlock", 3604),
+	PARTY("Party", 3606);
 
-	private final String name;
+	private final String label;
 	private final int spriteId;
 
-	Emote(String name, int spriteId)
+	public String toString()
 	{
-		this.name = name;
+		return label;
+	}
+
+	Emote(String label, int spriteId)
+	{
+		this.label = label;
 		this.spriteId = spriteId;
 	}
 }

@@ -102,6 +102,13 @@ public class EmotesPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		// migrate users from the old config setting
+		if (config.scrollToHighlighted())
+		{
+			log.debug("migrating emote scroll config");
+			config.setScrollToHighlighted(false);
+			config.setScrollMode(ScrollMode.MIDDLE);
+		}
 		overlayManager.add(overlay);
 		refreshHighlights();
 	}
@@ -175,7 +182,7 @@ public class EmotesPlugin extends Plugin
 
 	void scrollToHighlight(Widget widget)
 	{
-		if (!shouldScroll || !config.scrollToHighlighted() || widget == null)
+		if (!shouldScroll || config.scrollMode() == ScrollMode.DISABLED || widget == null)
 		{
 			return;
 		}
@@ -185,8 +192,25 @@ public class EmotesPlugin extends Plugin
 			return;
 		}
 		shouldScroll = false;
-		final int y = widget.getRelativeY() + widget.getHeight() / 2;
-		final int scroll = Math.max(0, Math.min(parent.getScrollHeight(), y - parent.getHeight() / 2));
+		int y = widget.getRelativeY();
+		int offset = 0;
+		switch (config.scrollMode())
+		{
+			case TOP:
+				// the top row of emotes begins at y=6
+				y -= 6;
+				break;
+			case MIDDLE:
+				y += widget.getHeight() / 2;
+				offset += parent.getHeight() / 2;
+				break;
+			case BOTTOM:
+				y += widget.getHeight();
+				offset += parent.getHeight();
+				break;
+		}
+		final int scroll = Math.max(0, Math.min(parent.getScrollHeight(), y - offset));
+		log.debug("scrolling widget {} to {}", widget.getSpriteId(), scroll);
 		client.runScript(ScriptID.UPDATE_SCROLLBAR, WidgetInfo.EMOTE_SCROLLBAR.getId(),
 			WidgetInfo.EMOTE_SCROLL_CONTAINER.getId(), scroll);
 	}
