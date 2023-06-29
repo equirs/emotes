@@ -102,6 +102,15 @@ public interface EmotesConfig extends Config
 	}
 
 	@ConfigItem(
+		position = 6,
+		keyName = "emoteToScrollTo",
+		name = "Emote to scroll to",
+		description = "Scrolls to this emote whenever the tab resets (if scroll mode enabled)",
+		hidden = true
+	)
+	void setEmoteToScrollTo(Emote emote);
+
+	@ConfigItem(
 		position = 7,
 		keyName = "scrollMode",
 		name = "Scroll mode",
@@ -121,6 +130,26 @@ public interface EmotesConfig extends Config
 	)
 	void setScrollMode(ScrollMode mode);
 
+	@ConfigItem(
+		keyName = "savedHighlightInfoV2",
+		name = "Highlighted emote info",
+		description = "Map of sprite ids to highlight",
+		hidden = true
+	)
+	default String savedHighlightInfoV2()
+	{
+		return "";
+	}
+
+	@ConfigItem(
+		keyName = "savedHighlightInfoV2",
+		name = "Highlighted emote info",
+		description = "Map of sprite ids to highlight",
+		hidden = true
+	)
+	void setSavedHighlightInfoV2(String serializedInfo);
+
+	// below configs are deprecated and will be eventually removed
 	@ConfigItem(
 		keyName = "savedHighlightInfo",
 		name = "Highlighted emote info",

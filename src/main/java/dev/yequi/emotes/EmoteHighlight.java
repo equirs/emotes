@@ -8,6 +8,7 @@ import lombok.With;
 @Value
 public class EmoteHighlight
 {
+	// as of v0.0.4, this is the Emote enum ordinal, not the sprite id
 	int spriteId;
 	Color fillColor;
 	Color borderColor;

@@ -76,21 +76,27 @@ public class EmoteOverlay extends Overlay
 			return null;
 		}
 		Map<Integer, EmoteHighlight> highlights = plugin.getHighlights();
-		if (highlights.isEmpty())
-		{
-			return null;
-		}
-		int spriteIdToScrollTo = config.emoteToScrollTo().getSpriteId();
+		int[] spriteIds = config.emoteToScrollTo().getSpriteIds();
 		for (Widget emoteWidget : emoteContainer.getDynamicChildren())
 		{
-			if (emoteWidget.getSpriteId() == spriteIdToScrollTo)
+			// scroll to the specified item
+			for (int spriteId : spriteIds)
 			{
-				plugin.scrollToHighlight(emoteWidget);
+				if (spriteId == emoteWidget.getSpriteId())
+				{
+					plugin.scrollToHighlight(emoteWidget);
+					break;
+				}
 			}
-			EmoteHighlight value = highlights.get(emoteWidget.getSpriteId());
-			if (value != null)
+			// highlight the emote
+			Emote emote = EmotesPlugin.emoteFromWidget(emoteWidget);
+			if (emote != null)
 			{
-				highlight(graphics, value, emoteWidget, emoteWindow);
+				EmoteHighlight value = highlights.get(emote.ordinal());
+				if (value != null)
+				{
+					highlight(graphics, value, emoteWidget, emoteWindow);
+				}
 			}
 		}
 		return null;

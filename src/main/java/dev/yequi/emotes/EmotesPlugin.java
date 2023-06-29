@@ -35,9 +35,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,7 @@ import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.Text;
 
 @Slf4j
 @PluginDescriptor(
@@ -66,9 +68,39 @@ import net.runelite.client.ui.overlay.OverlayManager;
 )
 public class EmotesPlugin extends Plugin
 {
-	static final Set<Integer> ALL_EMOTE_SPRITES = Arrays.stream(Emote.values())
-		.map(Emote::getSpriteId)
-		.collect(Collectors.toSet());
+	public static final Map<Integer, Emote> EMOTE_SPRITE_LOOKUP = Arrays.stream(Emote.values())
+		.collect(HashMap::new, (m, e) -> Arrays.stream(e.getSpriteIds()).forEach(i -> m.put(i, e)), HashMap::putAll);
+
+	private static final Map<String, Emote> EMOTE_NAME_LOOKUP = Arrays.stream(Emote.values())
+		.collect(Collectors.toMap(e -> e.getLabel().toLowerCase(), e -> e));
+
+	static
+	{
+		// 'relic unlock' changes name to 'fragment unlock' for leagues 3 variant
+		EMOTE_NAME_LOOKUP.put("fragment unlock", Emote.RELIC_UNLOCK);
+	}
+
+	@Nullable
+	public static Emote emoteFromWidget(Widget w)
+	{
+		if (w.getActions() == null)
+		{
+			return null;
+		}
+		String emoteName = "";
+		for (String action : w.getActions())
+		{
+			if (action.equals("Perform"))
+			{
+				emoteName = w.getName();
+			}
+			else if (action.startsWith("Perform "))
+			{
+				emoteName = action.replace("Perform ", "");
+			}
+		}
+		return EMOTE_NAME_LOOKUP.get(Text.removeTags(emoteName).toLowerCase());
+	}
 
 	@Inject
 	private Client client;
@@ -102,12 +134,27 @@ public class EmotesPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		// migrate users from the old config setting
+		// migrate users from old config settings
 		if (config.scrollToHighlighted())
 		{
 			log.debug("migrating emote scroll config");
 			config.setScrollToHighlighted(false);
 			config.setScrollMode(ScrollMode.MIDDLE);
+		}
+		if (!config.savedHighlightInfo().isEmpty())
+		{
+			Map<Integer, EmoteHighlight> highlights = getHighlights(true).values().stream()
+				.filter(e -> EMOTE_SPRITE_LOOKUP.containsKey(e.getSpriteId()))
+				.map(h -> {
+					// map old sprite id to new emote id
+					Emote emote = EMOTE_SPRITE_LOOKUP.get(h.getSpriteId());
+					return h.withSpriteId(emote.ordinal());
+				})
+				// key conflicts may occur for leagues emotes; just take one
+				.collect(Collectors.toMap(EmoteHighlight::getSpriteId, e -> e, (a, b) -> a));
+			log.debug("migrated old highlights: {} values", highlights.size());
+			config.setSavedHighlightInfoV2(gson.toJson(highlights.values()));
+			config.setSavedHighlightInfo("");
 		}
 		overlayManager.add(overlay);
 		refreshHighlights();
@@ -146,21 +193,23 @@ public class EmotesPlugin extends Plugin
 		{
 			return;
 		}
-		Widget emoteWidget = Arrays.stream(event.getMenuEntries())
+		Emote emote = Arrays.stream(event.getMenuEntries())
 			.map(MenuEntry::getWidget)
-			.filter(w -> w != null && ALL_EMOTE_SPRITES.contains(w.getSpriteId()))
+			.filter(w -> w != null && w.getActions() != null)
+			.map(EmotesPlugin::emoteFromWidget)
+			.filter(Objects::nonNull)
 			.findFirst()
 			.orElse(null);
-		if (emoteWidget != null)
+		if (emote != null)
 		{
-			final int spriteId = emoteWidget.getSpriteId();
-			final EmoteHighlight highlight = highlights.get(spriteId);
+			final int emoteId = emote.ordinal();
+			final EmoteHighlight highlight = highlights.get(emoteId);
 			final boolean highlighted = highlight != null;
 			client.createMenuEntry(1)
 				.setOption(highlighted ? "Remove highlight" : "Add highlight")
 				.setTarget("")
 				.setType(MenuAction.RUNELITE)
-				.onClick(e -> toggleHighlight(spriteId, highlighted));
+				.onClick(e -> toggleHighlight(emoteId, highlighted));
 			if (highlighted && config.rememberEmoteColors())
 			{
 				client.createMenuEntry(1)
@@ -175,8 +224,13 @@ public class EmotesPlugin extends Plugin
 					.setOption("Change label")
 					.setTarget("")
 					.setType(MenuAction.RUNELITE)
-					.onClick(e -> editLabel(spriteId, highlight.getLabel()));
+					.onClick(e -> editLabel(emoteId, highlight.getLabel()));
 			}
+			client.createMenuEntry(1)
+				.setOption("Scroll-on-reset")
+				.setTarget("")
+				.setType(MenuAction.RUNELITE)
+				.onClick(e -> config.setEmoteToScrollTo(emote));
 		}
 	}
 
@@ -215,17 +269,17 @@ public class EmotesPlugin extends Plugin
 			WidgetInfo.EMOTE_SCROLL_CONTAINER.getId(), scroll);
 	}
 
-	private void toggleHighlight(int spriteId, boolean highlighted)
+	private void toggleHighlight(int emoteId, boolean highlighted)
 	{
 		if (highlighted)
 		{
-			highlights.remove(spriteId);
+			highlights.remove(emoteId);
 		}
 		else
 		{
-			EmoteHighlight highlight = new EmoteHighlight(spriteId, config.fillColor(), config.borderColor(),
+			EmoteHighlight highlight = new EmoteHighlight(emoteId, config.fillColor(), config.borderColor(),
 				config.labelColor(), "");
-			highlights.put(spriteId, highlight);
+			highlights.put(emoteId, highlight);
 		}
 		saveHighlights();
 	}
@@ -238,15 +292,15 @@ public class EmotesPlugin extends Plugin
 		saveHighlights();
 	}
 
-	private void editLabel(int spriteId, String currentLabel)
+	private void editLabel(int emoteId, String currentLabel)
 	{
 		chatboxPanelManager.openTextInput("Emote label")
 			.value(Optional.ofNullable(currentLabel).orElse(""))
 			.onDone(label -> {
-				EmoteHighlight highlight = highlights.get(spriteId);
+				EmoteHighlight highlight = highlights.get(emoteId);
 				if (highlight != null)
 				{
-					highlights.put(spriteId, highlight.withLabel(label));
+					highlights.put(emoteId, highlight.withLabel(label));
 					saveHighlights();
 				}
 			})
@@ -255,21 +309,26 @@ public class EmotesPlugin extends Plugin
 
 	private void refreshHighlights()
 	{
-		String json = config.savedHighlightInfo();
+		highlights = getHighlights(false);
+	}
+
+	private Map<Integer, EmoteHighlight> getHighlights(boolean legacy)
+	{
+		String json = legacy ? config.savedHighlightInfo() : config.savedHighlightInfoV2();
 		if (Strings.isNullOrEmpty(json))
 		{
-			return;
+			return new HashMap<>();
 		}
 		Type type = new TypeToken<Collection<EmoteHighlight>>()
 		{
 		}.getType();
 		Collection<EmoteHighlight> saved = gson.fromJson(json, type);
-		highlights = saved.stream()
+		return saved.stream()
 			.collect(Collectors.toMap(EmoteHighlight::getSpriteId, s -> s));
 	}
 
 	private void saveHighlights()
 	{
-		config.setSavedHighlightInfo(gson.toJson(highlights.values()));
+		config.setSavedHighlightInfoV2(gson.toJson(highlights.values()));
 	}
 }
