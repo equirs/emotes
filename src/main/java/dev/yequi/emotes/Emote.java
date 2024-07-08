@@ -98,7 +98,8 @@ public enum Emote
 	EXPLORE("Explore", ExtraSpriteID.EXPLORE, ExtraSpriteID.EXPLORE_LOCKED),
 	RELIC_UNLOCK("Relic unlock", ExtraSpriteID.RELIC_UNLOCK_TWISTED,
 		ExtraSpriteID.RELIC_UNLOCK_TRAILBLAZER, ExtraSpriteID.FRAGMENT_UNLOCK, ExtraSpriteID.RELIC_UNLOCK_LOCKED),
-	PARTY("Party", ExtraSpriteID.PARTY, ExtraSpriteID.PARTY_LOCKED);
+	PARTY("Party", ExtraSpriteID.PARTY, ExtraSpriteID.PARTY_LOCKED),
+	TRICK("Trick", ExtraSpriteID.TRICK, ExtraSpriteID.TRICK_LOCKED);
 
 	private final String label;
 	private final int[] spriteIds;

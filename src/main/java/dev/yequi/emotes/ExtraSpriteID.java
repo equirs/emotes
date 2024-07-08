@@ -15,4 +15,7 @@ public class ExtraSpriteID
 
 	public static final int PARTY = 3606;
 	public static final int PARTY_LOCKED = 2430;
+
+	public static final int TRICK = 3607;
+	public static final int TRICK_LOCKED = 5249;
 }
