@@ -90,6 +90,10 @@ public class EmotesPlugin extends Plugin
 		String emoteName = "";
 		for (String action : w.getActions())
 		{
+			if (action == null)
+			{
+				continue;
+			}
 			if (action.equals("Perform"))
 			{
 				emoteName = w.getName();
