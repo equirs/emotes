@@ -49,9 +49,9 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetID;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -184,7 +184,7 @@ public class EmotesPlugin extends Plugin
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
 		// re-perform the scroll every time the widget is reloaded (normally would scroll back to top)
-		if (event.getGroupId() == WidgetID.EMOTES_GROUP_ID)
+		if (event.getGroupId() == InterfaceID.EMOTES)
 		{
 			shouldScroll = true;
 		}
@@ -244,7 +244,7 @@ public class EmotesPlugin extends Plugin
 		{
 			return;
 		}
-		final Widget parent = client.getWidget(WidgetInfo.EMOTE_SCROLL_CONTAINER);
+		final Widget parent = client.getWidget(ComponentID.EMOTES_EMOTE_SCROLL_CONTAINER);
 		if (parent == null)
 		{
 			return;
@@ -269,8 +269,8 @@ public class EmotesPlugin extends Plugin
 		}
 		final int scroll = Math.max(0, Math.min(parent.getScrollHeight(), y - offset));
 		log.debug("scrolling widget {} to {}", widget.getSpriteId(), scroll);
-		client.runScript(ScriptID.UPDATE_SCROLLBAR, WidgetInfo.EMOTE_SCROLLBAR.getId(),
-			WidgetInfo.EMOTE_SCROLL_CONTAINER.getId(), scroll);
+		client.runScript(ScriptID.UPDATE_SCROLLBAR, ComponentID.EMOTES_EMOTE_SCROLLBAR,
+			ComponentID.EMOTES_EMOTE_SCROLL_CONTAINER, scroll);
 	}
 
 	private void toggleHighlight(int emoteId, boolean highlighted)

@@ -37,8 +37,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -65,12 +65,12 @@ public class EmoteOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		Widget emoteContainer = client.getWidget(WidgetInfo.EMOTE_CONTAINER);
+		Widget emoteContainer = client.getWidget(ComponentID.EMOTES_EMOTE_CONTAINER);
 		if (emoteContainer == null || emoteContainer.isHidden())
 		{
 			return null;
 		}
-		Widget emoteWindow = client.getWidget(WidgetInfo.EMOTE_WINDOW);
+		Widget emoteWindow = client.getWidget(ComponentID.EMOTES_WINDOW);
 		if (emoteWindow == null)
 		{
 			return null;
